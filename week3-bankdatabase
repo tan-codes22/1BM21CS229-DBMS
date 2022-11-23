@@ -1,0 +1,84 @@
+drop database bankDb;
+create database bankDb;
+use bankDb;
+create table Branch(
+branch_name varchar(30),
+branch_city varchar(50),
+assets float,
+primary key(branch_name));
+create table BankAccount(
+accno int,
+branch_name varchar(30),
+balance float,
+primary key(accno),
+foreign key(branch_name)
+references Branch(branch_name) 
+on delete cascade on update cascade);
+create table BankCustomer(
+customer_name varchar(20),
+customer_street varchar(20),
+customer_city varchar(10),
+primary key(customer_name));
+create table depositor(
+customer_name varchar(20),
+accno int,
+primary key(customer_name,accno),
+foreign key(customer_name) references BankCustomer(customer_name) on delete cascade on
+update cascade,
+foreign key(accno) references BankAccount(accno) on delete cascade on update cascade);
+create table loan(
+loan_number int,
+branch_name varchar(30),
+amount float,
+primary key(loan_number),
+foreign key(branch_name) references Branch(branch_name) on delete cascade on update cascade);
+
+insert into branch values('icici_deshpande','bangalore',50619);
+insert into branch values('icici_residencyRoad','bangalore',50219);
+insert into branch values('icici_shivajiRoad','mumbai',25670);
+insert into branch values('icici_parlimentRoad','delhi',10430);
+insert into branch values('icici_basavangudi','pune',20066);
+
+select*from branch;  
+
+insert into bankAccount values(1,'icici_deshpande',50619);
+insert into bankAccount values(2,'icici_residencyRoad',50219);
+insert into bankAccount values(3,'icici_shivajiRoad',25670);
+insert into bankAccount values(4,'icici_parlimentRoad',10430);
+insert into bankAccount values(5,'icici_basavangudi',20066);
+insert into bankAccount values(6,'icici_shivajiRoad',25670); 
+
+select*from bankaccount;
+
+insert into bankCustomer values('Tanisha','bull_temple_road','bangalore');
+insert into bankCustomer values('Hasnain','banerghatta_road','bangalore');
+insert into bankCustomer values('Zayd','akbar_road','bangalore');
+insert into bankCustomer values('Aadhya','nationalCollege_road','delhi');
+insert into bankCustomer values('Yash','prithviraj_road','delhi');
+
+insert into depositor values('Tanisha',1);
+insert into depositor values('Hasnain',2);
+insert into depositor values('Zayd',3);
+insert into depositor values('Aadhya',4);
+insert into depositor values('Yash',5);
+
+insert into loan values(1, 'icici_deshpande', 50619);
+insert into loan values(2,'icici_residencyRoad',50219);
+insert into loan values(3,'icici_shivajiRoad',25670);
+insert into loan values(4,'icici_parlimentRoad',10430);
+insert into loan values(5,'icici_basavangudi',20066);
+
+select customer_name,count(*),branch_name from depositor d inner join BankAccount b on
+d.accno=b.accno group by customer_name,branch_name having count(*)>=2;
+
+select branch_name,branch_city,assets/100000 as assets_in_Lakhs from Branch;
+
+create view loan_sum1 as
+select branch_name, sum(amount)
+from loan
+group by branch_name;
+
+select distinct(customer_name) from depositer d, bankaccount b where (d.accno=b.accno and b.branch_name='sbi_residencyRoad') having(count(*)>1);
+
+delete from bankaccount where branch_name in(select branch_name from branch where branch_city='mumbai');
+
