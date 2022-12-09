@@ -1,0 +1,77 @@
+create database employeevck;
+use employeevck;
+create table dept(
+deptno int,
+dname varchar(20),
+dloc varchar(20),
+primary key(deptno));
+create table employee(
+empno int,
+ename varchar(20),
+mgr_no int,
+hiredate date,
+sal float,
+deptno int,
+primary key(empno),
+foreign key(deptno) references dept(deptno)
+on delete cascade on update cascade);
+create table project(
+pno int,
+ploc varchar(20),
+pname varchar(20),
+primary key(pno));
+create table incentives(
+empno int,
+incentive_date date,
+incentive_amount float,
+primary key(empno,incentive_date),
+foreign key(empno) references employee(empno)
+on delete cascade on update cascade);
+create table assigned_to(
+empno int,
+pno int,
+job_role varchar(20),
+primary key(empno,pno),
+foreign key(empno) references employee(empno)
+on delete cascade on update cascade,
+foreign key(pno) references project(pno)
+on delete cascade on update cascade);
+
+insert into dept values 
+('1','Cybersecurity','Pune'),
+('2','Survey','Mysore'),
+('3','Cloud Computing','Bangalore'),
+('4','Web Development','Bangalore'),
+('5','Data Analytics','Mumbai');
+select * from dept;
+insert into employee values
+(101,'Ram',100,'2005-03-10',50000,3),
+(102,'Sam',104,'2008-07-27',55000,1),
+(103,'Hari',108,'2020-05-19',80000,2),
+(104,'Vishnu',104,'2016-07-23',75000,1),
+(105,'Vinod',101,'2009-12-07',70000,5);
+insert into project values 
+(21,'Delhi','Webpage'),
+(22,'Mysore','Google Cloud'),
+(23,'Mumbai','App development'),
+(24, 'Hyderabad','IOT'),
+(25,'Bangalore','UI/UX');
+
+insert into incentives values 
+(101,'2005-11-09',10000),
+(102,'2009-12-07',20000),
+(103,'2021-07-09',25000),
+(104,'2018-09-03',20000);
+
+insert into assigned_to values
+(101,22,'Fullstack dev'),
+(102,23,'UI/UX Designer'),
+(103,21,'Data Analyst'),
+(104,24,'Cybsec engineer'),
+(105,25,'Blockchain eng');
+
+select empno from project p,assigned_to a where p.pno=a.pno and p.ploc in('Bangalore','Hyderabad','Mysore');
+
+select empno from employee e where e.empno not in (select empno from incentives);
+
+select a.empno,a.pno,e.ename,e.deptno,d.dname,d.dloc,p.ploc from assigned_to a,project p,dept d,employee e where a.pno=p.pno and a.empno=e.empno and e.deptno=d.deptno and d.dloc=p.ploc;        
