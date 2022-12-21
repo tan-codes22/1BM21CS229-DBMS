@@ -1,0 +1,82 @@
+create database supplier;
+use supplier;
+create table supllier(
+sid varchar(20),
+sname varchar(20),
+city varchar(20),
+primary key(sid)
+);
+DESC supllier;
+create table parts(
+pid varchar(20),
+pname varchar(20),
+color varchar(20),
+primary key(pid)
+);
+create table catlog(
+sid varchar(20),
+pid varchar(20),
+cost varchar(20),
+primary key(sid,pid),
+foreign key(pid)references parts(pid),
+foreign key(sid)references supllier(sid)
+);
+insert into supllier values(10001,'acme widget','bangalore');
+insert into supllier values(10002,'johns','kolkata');
+insert into supllier values(10003,'vimal','mumbai');
+insert into supllier values(10004,'reliance','delhi');
+insert into parts values(20001,'book','red');
+insert into parts values(20002,'pen','red');
+insert into parts values(20003,'pencil','green');
+insert into parts values(20004,'mobile','green');
+insert into parts values(20005,'charger','black');
+insert into catlog values(10001,20001,10);
+insert into catlog values(10001,20002,10);
+insert into catlog values(10001,20003,30);
+insert into catlog values(10001,20004,10);
+insert into catlog values(10001,20005,10);
+insert into catlog values(10002,20001,10);
+insert into catlog values(10002,20002,20);
+insert into catlog values(10003,20003,30);
+insert into catlog values(10004,20003,40);
+
+select pname from parts where pid IN (select pid from catlog);
+
+select sname from
+(select c.sname,count(distinct a.pid) as cnt from catlog a
+left join parts b on a.pid=b.pid
+left join supllier c on c.sid=a.sid group by 1) a
+where cnt=(select count(distinct a.pid) from catlog a
+left join parts b on a.pid=b.pid);
+
+select distinct sname from
+(select c.sname,b.pname,b.color from catlog a
+left join parts b on a.pid=b.pid
+left join supllier c on c.sid=a.sid )a
+where color='red';
+
+select A.pname from parts A
+left join catlog B on A.pid=B.pid
+left join supllier C on B.sid=C.sid where lower(c.sname)='acme widget'
+and a.pname not in (select A.pname from parts A
+left join catlog B on A.pid=B.pid
+left join supllier C on B.sid=C.sid where lower(c.sname)<>'acme widget')
+;
+
+select a.sid from
+(select A.pid,C.sid,cost from parts A
+left join catlog B on A.pid=B.pid
+left join supllier C on B.sid=C.sid )A
+left join
+(select A.pid,avg(cost) as cost from parts A
+left join catlog B on A.pid=B.pid
+left join supllier C on B.sid=C.sid where cost is not null group by 1 )B on A.pid=B.pid
+where a.cost>b.cost
+
+select p.pid,s.sname
+from suppliers s,catalog c,parts p
+where c.pid=p.pid and s.sid=c.sid and c.cost=(select
+max(c1.cost)
+from catalog c1
+where c1.pid=p.pid)
+order by s.sname;
