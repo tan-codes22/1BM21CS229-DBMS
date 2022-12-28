@@ -1,0 +1,107 @@
+create database Airline;
+use Airline;
+create table flights(
+flno int,
+ffrom varchar(50),
+tto varchar(50),
+distance int,
+departs time, 
+arrives time,
+price int,
+primary key(flno));
+
+create table aircraft(
+aid int,
+aname varchar(50),
+cruisingrange int,
+primary key(aid));
+
+create table employee(
+eid int,
+ename varchar(50),
+salary int,
+primary key(eid));
+
+create table certified(
+eid int,aid int,
+foreign key(aid) references aircraft(aid)
+on update cascade on delete cascade,
+foreign key(eid) references employee(eid)
+on update cascade on delete cascade);
+
+
+insert into employee values
+(101,'Avinash',50000),
+(102,'Lokesh',60000),
+(103,'Rakesh',70000),
+(104,'Santhosh',82000),
+(105,'Tilak',5000);
+
+insert into aircraft values
+(1,'Airbus',2000),
+(2,'Boeing',700),
+(3,'JetAirways',550),
+(4,'Indigo',5000),
+(5,'Boeing',4500),
+(6,'Airbus',2200);
+
+insert into certified values
+(101,2),(101,4),(101,5),
+(101,6),(102,1),(102,3),
+(102,5),(103,2),(103,3),
+(103,5),(103,6),(104,6),
+(104,1),(104,3),(105,3);
+
+insert into flights values
+(1,'Banglore','New Delhi',500,'6:00','9:00',5000),
+(2,'Banglore','Chennai',300,'7:00','8:30',3000),
+(3,'Trivandrum','New Delhi',800,'8:00','11:30',6000),
+(4,'Banglore','Frankfurt',10000,'6:00','23:30',50000),
+(5,'Kolkata','New Delhi',2400,'11:00','3:30',9000),
+(6,'Banglore','Frankfurt',8000,'9:00','23:00',40000);
+
+
+SELECT  a.aname
+FROM aircraft a,certified c,employee e
+WHERE a.aid=c.aid
+AND c.eid=e.eid
+AND NOT EXISTS
+(SELECT *
+FROM employee e1
+WHERE e1.eid=e.eid
+    AND e1.salary<80000);
+    
+SELECT c.eid,MAX(cruisingrange)
+FROM certified c,aircraft a
+WHERE c.aid=a.aid
+GROUP BY c.eid
+HAVING COUNT(*)>2;
+
+SELECT DISTINCT e.ename
+FROM employee e
+WHERE e.salary<
+(SELECT MIN(f.price)
+FROM flights f
+WHERE f.ffrom='Banglore'
+AND f.tto='Frankfurt');
+    
+select a.aid, a.aname,avg(e.salary) 
+from aircraft a, employee e, certified c
+where a.aid=c.aid and c.eid=e.eid
+and a.cruisingrange>1000
+group by  a.aid, a.aname;
+
+SELECT distinct e.ename
+FROM employee e,aircraft a,certified c
+WHERE e.eid=c.eid
+AND c.aid=a.aid
+AND a.aname='Boeing';
+  
+SELECT a.aid
+FROM aircraft a
+WHERE a.cruisingrange>
+(SELECT MIN(f.distance)
+FROM flights f
+WHERE f.ffrom='Banglore'
+AND f.tto='New Delhi');
+
